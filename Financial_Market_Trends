@@ -1,0 +1,26 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn import preprocessing, model_selection, svm
+from portfolioopt import EfficientFrontier
+import yfinance as yf
+
+# Fetch financial data using Yahoo Finance API
+tickers = ['AAPL', 'GOOGL', 'MSFT', 'AMZN']
+data = yf.download(tickers, start='2022-01-01', end='2023-01-01')['Adj Close']
+
+# Calculate returns
+returns = data.pct_change().dropna()
+
+# Visualize price trends
+plt.figure(figsize=(10, 6))
+sns.lineplot(data=data, x=data.index, y='AAPL', label='AAPL')
+sns.lineplot(data=data, x=data.index, y='GOOGL', label='GOOGL')
+sns.lineplot(data=data, x=data.index, y='MSFT', label='MSFT')
+sns.lineplot(data=data, x=data.index, y='AMZN', label='AMZN')
+plt.title('Financial Market Trends')
+plt.xlabel('Date')
+plt.ylabel('Price')
+plt.legend()
+plt.show()
