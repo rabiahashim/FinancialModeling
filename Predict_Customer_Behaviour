@@ -1,0 +1,29 @@
+import pandas as pd
+import numpy as np
+import statsmodels.api as sm
+from tensorflow import keras
+from sklearn.model_selection import train_test_split
+
+# Fetch customer data from Kaggle's Telco Customer Churn dataset
+url = 'https://raw.githubusercontent.com/IBM/telco-customer-churn-on-icp4d/master/data/Telco-Customer-Churn.csv'
+data = pd.read_csv(url)
+
+# Preprocess data
+data['Churn'] = data['Churn'].map({'Yes': 1, 'No': 0})
+X = data.drop(columns=['customerID', 'Churn'])
+y = data['Churn']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Build time-series forecast
+model = sm.tsa.ARIMA(y_train, order=(2, 1, 0))
+results = model.fit()
+forecast = results.forecast(steps=len(X_test))
+
+# Build customer churn prediction model
+model = keras.Sequential([
+    keras.layers.Dense(64, activation='relu', input_shape=(X_train.shape[1],)),
+    keras.layers.Dense(1, activation='sigmoid')
+])
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+model.fit(X_train, y_train, epochs=10, batch_size=32)
+accuracy = model.evaluate(X_test, y_test)[1]
